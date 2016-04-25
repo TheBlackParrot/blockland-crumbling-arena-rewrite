@@ -46,6 +46,12 @@ function MinigameSO::startRound(%this) {
 	if($CrumblingArena::EnableSpleef) {
 		%this.messageAll('', "\c5This round is a \c3Spleef round\c5! Click bricks under you to make them fall!");
 	}
+
+	$CrumblingArena::EnableRockets = !getRandom(0, 8);
+	if($CrumblingArena::EnableRockets) {
+		%this.messageAll('', "\c5Rockets will fall from above! Watch out!");
+		%this.schedule(10001+%offset, doRockets);
+	}
 }
 
 function MinigameSO::doCountDown(%this, %delay, %data) {
@@ -76,11 +82,12 @@ package CrumblingArenaSystem {
 			}
 		}
 
+		$CrumblingArena::WinnerDetermined = 0;
 		%this.newRound();
 	}
 
 	function MinigameSO::checkLastManStanding(%this) {
-		if(isEventPending(%this.resetSched)) {
+		if(isEventPending(%this.resetSched) || $CrumblingArena::WinnerDetermined) {
 			return;
 		}
 
@@ -116,6 +123,8 @@ package CrumblingArenaSystem {
 
 			%last[0].saveCAData();
 
+			$CrumblingArena::WinnerDetermined = 1;
+			CARockets.explode();
 			return;
 		}
 
@@ -125,6 +134,7 @@ package CrumblingArenaSystem {
 
 		%this.messageAll('', "\c5No one won this round. Resetting in \c35 seconds...");
 		%this.resetSched = %this.schedule(5000, reset);
+		CARockets.explode();
 	}
 };
 activatePackage(CrumblingArenaSystem);

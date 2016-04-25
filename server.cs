@@ -9,6 +9,7 @@ exec("./board.cs");
 exec("./system.cs");
 exec("./interaction.cs");
 exec("./saving.cs");
+exec("./rockets.cs");
 
 package CrumblingArenaServerPackage {
 	function onServerDestroyed() {
