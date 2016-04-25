@@ -18,11 +18,40 @@ function fxDTSBrick::fakeRemove(%this) {
 	%this.playSound(CA_popSound);
 }
 
+function Player::getBrickLookedAt(%this) {
+	%eye = vectorScale(%this.getEyeVector(), 100);
+	%pos = %this.getEyePoint();
+	%mask = $TypeMasks::FXBrickObjectType;
+	%hit = getWord(containerRaycast(%pos, vectorAdd(%pos, %eye), %mask, %this), 0);
+
+	if(isObject(%hit)) {
+		return %hit;
+	}
+
+	return -1;
+}
+
 package CrumblingArenaInteraction {
 	function fxDTSBrick::onPlayerTouch(%this, %player) {
 		%this.breakBrick();
 
 		return parent::onPlayerTouch(%this, %player);
+	}
+
+	function Armor::onTrigger(%this, %player, %slot, %val) {
+		if($CrumblingArena::EnableSpleef) {
+			if(%slot == 0 && %val) {
+				%looking = %player.getBrickLookedAt();
+				if(isObject(%looking)) {
+					if(!isEventPending(%looking.breakSched) &&  $CrumblingArena::Active) {
+						%looking.playSound(CA_clickSound);
+					}
+					%looking.breakBrick();
+				}
+			}
+		}
+		
+		return parent::onTrigger(%this, %player, %slot, %val);
 	}
 
 	function Armor::onEnterLiquid(%this, %obj, %coverage, %type) {

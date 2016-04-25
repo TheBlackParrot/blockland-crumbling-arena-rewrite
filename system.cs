@@ -41,6 +41,11 @@ function MinigameSO::startRound(%this) {
 	%offset = mClamp(BrickGroup_888888.getCount(), 0, 10000);
 	%this.activeSched = %this.schedule(10000+%offset, setGameActive, 1);
 	%this.timerSched = %this.schedule(5000+%offset, startTimer);
+
+	$CrumblingArena::EnableSpleef = !getRandom(0, 8);
+	if($CrumblingArena::EnableSpleef) {
+		%this.messageAll('', "\c5This round is a \c3Spleef round\c5! Click bricks under you to make them fall!");
+	}
 }
 
 function MinigameSO::doCountDown(%this, %delay, %data) {
