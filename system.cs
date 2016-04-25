@@ -29,8 +29,11 @@ function MinigameSO::onBoardBuilt(%this) {
 
 		%spawnPos = vectorRand(CABoardData.spawnStart, CABoardData.spawnEnd);
 		%player.setTransform(%spawnPos);
+
+		%client.saveCAData();
 	}
 
+	%this.amountPlayed = %this.numMembers;
 	%this.startRound();
 }
 
@@ -76,18 +79,38 @@ package CrumblingArenaSystem {
 			return;
 		}
 
+		%count = 0;
 		for(%i=0;%i<%this.numMembers;%i++) {
 			%client = %this.member[%i];
 			
 			if(isObject(%client.player)) {
+				%last[%count] = %client;
 				%count++;
-				%last = %client;
 			}
 		}
 
+		if(%count == 2) {
+			%this.messageAll('', "\c5It's down to 2 players! Swords have been given out.");
+			
+			%last[0].player.setItem(SwordItem);
+			%last[1].player.setItem(SwordItem);
+			
+			return;
+		}
+
 		if(%count == 1) {
-			%this.messageAll('', "\c3" @ %last.getName() SPC "\c5has won this round! Resetting in \c35 seconds.");
+			if(%this.amountPlayed > 2) {
+				%last[0].wins++;
+				%last[0].score = %last[0].wins;
+
+				%add = " \c3" @ %last[0].getName() SPC "\c5has won\c3" SPC %last[0].wins SPC "time(s)!";
+			}
+
+			%this.messageAll('', "\c3" @ %last[0].getName() SPC "\c5has won this round!" @ %add @ " Resetting in \c35 seconds.");
 			%this.resetSched = %this.schedule(5000, reset);
+
+			%last[0].saveCAData();
+
 			return;
 		}
 
