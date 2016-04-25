@@ -6,3 +6,5 @@ datablock AudioProfile(CA_stepSound)
 };
 
 datablock AudioProfile(CA_popSound : CA_stepSound) { filename = "./sounds/pop.wav"; };
+datablock AudioProfile(CA_countdownSound : CA_stepSound) { filename = "./sounds/countdown.wav"; };
+datablock AudioProfile(CA_goSound : CA_stepSound) { filename = "./sounds/go.wav"; };

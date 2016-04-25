@@ -40,12 +40,16 @@ function MinigameSO::startRound(%this) {
 	%this.timerSched = %this.schedule(5000+%offset, startTimer);
 }
 
+function MinigameSO::doCountDown(%this, %delay, %data) {
+	%this.schedule(%delay, centerPrintAll, %data);
+	%this.schedule(%delay, playSound, CA_countdownSound);
+}
+
 function MinigameSO::startTimer(%this) {
-	%this.centerPrintAll("<font:Impact:64>\c55");
-	%this.schedule(1000, centerPrintAll, "<font:Impact:64>\c54");
-	%this.schedule(2000, centerPrintAll, "<font:Impact:64>\c53");
-	%this.schedule(3000, centerPrintAll, "<font:Impact:64>\c52");
-	%this.schedule(4000, centerPrintAll, "<font:Impact:64>\c51");
+	for(%i=0;%i<5;%i++) {
+		%this.doCountDown(%i*1000, "<font:Impact:64>\c5" @ 5-%i);
+	}
+	%this.schedule(5000, playSound, CA_goSound);
 	%this.schedule(5000, centerPrintAll, "<font:Impact:64>\c2START!", 1);
 }
 

@@ -16,6 +16,16 @@ function vectorRand(%v0, %v1) {
 	return %rx SPC %ry SPC %rz;
 }
 
+function MinigameSO::playSound(%this, %data) {
+	if(!isObject(%data)) {
+		return;
+	}
+	
+	for(%i=0;%i<%this.numMembers;%i++) {
+		%this.member[%i].play2D(%data);
+	}
+}
+
 package CrumblingArenaServerPackage {
 	function onServerDestroyed() {
 		deleteVariables("$CrumblingArena::*");
