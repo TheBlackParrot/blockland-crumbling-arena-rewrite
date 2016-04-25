@@ -6,8 +6,8 @@ function generateCABoard() {
 	%mg = $DefaultMinigame;
 	%allowed = $Pref::Server::CrumblingArena::AllowedBricks;
 
-	%width = CABoardData.width = 10 + getRandom(mFloor(%mg.numMembers / 4)*-1, mFloor(%mg.numMembers / 4));
-	%length = CABoardData.length = 10 + getRandom(mFloor(%mg.numMembers / 4)*-1, mFloor(%mg.numMembers / 4));
+	%width = CABoardData.width = 12 + getRandom(mFloor(%mg.numMembers / 3), mFloor((%mg.numMembers / 3)*1.5));
+	%length = CABoardData.length = 12 + getRandom(mFloor(%mg.numMembers / 3), mFloor((%mg.numMembers / 3)*1.5));
 	%height = CABoardData.height = getRandom((%mg.numMembers > 4 ? 2 : 1), 16);
 
 	%brickdata = "brick" @ getWord(%allowed, getRandom(0, getWordCount(%allowed)-1));
