@@ -10,6 +10,8 @@ exec("./system.cs");
 exec("./interaction.cs");
 exec("./saving.cs");
 exec("./rockets.cs");
+exec("./cheat_prevention.cs");
+exec("./commands.cs");
 
 package CrumblingArenaServerPackage {
 	function onServerDestroyed() {

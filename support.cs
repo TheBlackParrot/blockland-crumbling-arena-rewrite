@@ -16,16 +16,23 @@ function MinigameSO::playSound(%this, %data) {
 	}
 }
 
-// Event_SetItem
-function Player::setItem(%this,%item) {
-	if(isObject(%this)) {
-		if(%item==-1) {
-			%this.updateArm(0);
-			%this.unMountImage(0);
-		}
-		else {
-			%this.updateArm(%item.image);
-			%this.mountImage(%item.image,0);
-		}
-	}
+function mInterpolate(%var1, %var2, %weight) {
+   return (1 - %weight) * %var1 + (%weight * %var2);
+}
+
+// Event_addItem
+// (who the hell uses 3 space tabs wtf)
+function Player::addItem(%player,%image,%client)
+{
+   for(%i = 0; %i < %player.getDatablock().maxTools; %i++)
+   {
+      %tool = %player.tool[%i];
+      if(%tool == 0)
+      {
+         %player.tool[%i] = %image;
+         %player.weaponCount++;
+         messageClient(%client,'MsgItemPickup','',%i,%image);
+         break;
+      }
+   }
 }

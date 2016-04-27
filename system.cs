@@ -30,10 +30,13 @@ function MinigameSO::onBoardBuilt(%this) {
 		%spawnPos = vectorRand(CABoardData.spawnStart, CABoardData.spawnEnd);
 		%player.setTransform(%spawnPos);
 
+		%player.checkForCheats();
+
 		%client.saveCAData();
 	}
 
 	%this.amountPlayed = %this.numMembers;
+	%this.aliveCount = %this.amountPlayed;
 	%this.startRound();
 }
 
@@ -42,12 +45,12 @@ function MinigameSO::startRound(%this) {
 	%this.activeSched = %this.schedule(10000+%offset, setGameActive, 1);
 	%this.timerSched = %this.schedule(5000+%offset, startTimer);
 
-	$CrumblingArena::EnableSpleef = !getRandom(0, 8);
+	$CrumblingArena::EnableSpleef = !getRandom(0, 4);
 	if($CrumblingArena::EnableSpleef) {
 		%this.messageAll('', "\c5This round is a \c3Spleef round\c5! Click bricks under you to make them fall!");
 	}
 
-	$CrumblingArena::EnableRockets = !getRandom(0, 8);
+	$CrumblingArena::EnableRockets = !getRandom(0, 3);
 	if($CrumblingArena::EnableRockets) {
 		%this.messageAll('', "\c5Rockets will fall from above! Watch out!");
 		%this.schedule(10001+%offset, doRockets);
@@ -71,8 +74,16 @@ function MinigameSO::setGameActive(%this, %val) {
 	$CrumblingArena::Active = mClamp(%val, 0, 1);
 }
 
+function MinigameSO::getDeleteOffset(%this) {
+	%val = mInterpolate(50, 1000, (%this.aliveCount-1) / %this.amountPlayed);
+	return %val;
+}
+
 package CrumblingArenaSystem {
 	function MinigameSO::reset(%this) {
+		cancel(%this.speedSched);
+		setTimescale(1);
+
 		for(%i=0;%i<%this.numMembers;%i++) {
 			%client = %this.member[%i];
 			%player = %client.player;
@@ -87,10 +98,6 @@ package CrumblingArenaSystem {
 	}
 
 	function MinigameSO::checkLastManStanding(%this) {
-		if(isEventPending(%this.resetSched) || $CrumblingArena::WinnerDetermined) {
-			return;
-		}
-
 		%count = 0;
 		for(%i=0;%i<%this.numMembers;%i++) {
 			%client = %this.member[%i];
@@ -100,12 +107,32 @@ package CrumblingArenaSystem {
 				%count++;
 			}
 		}
+		%this.aliveCount = %count;
+
+		if(isEventPending(%this.resetSched) || $CrumblingArena::WinnerDetermined) {
+			return;
+		}
 
 		if(%count == 2) {
-			%this.messageAll('', "\c5It's down to 2 players! Swords have been given out.");
-			
-			%last[0].player.setItem(SwordItem);
-			%last[1].player.setItem(SwordItem);
+			%potential = getRandom(0, 1);
+			switch(%potential) {
+				case 0:
+					%item = SwordItem.getID();
+					%itemName = "Swords";
+
+				case 1:
+					%item = PushbroomItem.getID();
+					%itemName = "Pushbrooms";
+			}
+
+			%this.messageAll('', "\c5It's down to 2 players!" SPC %itemName SPC "have been given out.");
+
+			%last[0].player.tool[0] = %item;
+			messageClient(%last[0],'MsgItemPickup','',0,%item);
+			%last[1].player.tool[0] = %item;
+			messageClient(%last[1],'MsgItemPickup','',0,%item);
+
+			%this.speedSched = schedule(15000, 0, setTimescale, 2);
 			
 			return;
 		}
@@ -115,10 +142,10 @@ package CrumblingArenaSystem {
 				%last[0].wins++;
 				%last[0].score = %last[0].wins;
 
-				%add = " \c3" @ %last[0].getName() SPC "\c5has won\c3" SPC %last[0].wins SPC "time(s)!";
+				%add = " \c3" @ %last[0].name SPC "\c5has won\c3" SPC %last[0].wins SPC "time(s)!";
 			}
 
-			%this.messageAll('', "\c3" @ %last[0].getName() SPC "\c5has won this round!" @ %add @ " Resetting in \c35 seconds.");
+			%this.messageAll('', "\c3" @ %last[0].name SPC "\c5has won this round!" @ %add @ " Resetting in \c35 seconds.");
 			%this.resetSched = %this.schedule(5000, reset);
 
 			%last[0].saveCAData();

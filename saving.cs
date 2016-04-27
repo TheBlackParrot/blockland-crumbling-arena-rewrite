@@ -11,6 +11,7 @@ function GameConnection::loadCAData(%this) {
 	%this.wins = %file.readLine();
 	%this.score = %this.wins;
 	messageClient(%this, '', "\c6Your save from\c3" SPC %file.readLine() SPC "\c6has been loaded.");
+	%this.brokenBricks = %file.readLine();
 
 	%file.close();
 	%file.delete();
@@ -24,6 +25,7 @@ function GameConnection::saveCAData(%this) {
 
 	%file.writeLine(%this.wins);
 	%file.writeLine(getDateTime());
+	%file.writeLine(%this.brokenBricks);
 
 	%file.close();
 	%file.delete();

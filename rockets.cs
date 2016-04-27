@@ -51,22 +51,30 @@ function MinigameSO::doRockets(%this) {
 		return;
 	}
 
-	%this.rocketSched = %this.schedule(15000 + getRandom(0, 15000), doRockets);
+	%this.rocketSched = %this.schedule(5000 + getRandom(0, 5000), doRockets);
 
 	%pos = vectorAdd(vectorRand(CABoardData.spawnStart, CABoardData.spawnEnd), "0 0 100");
 	spawnRocket(%pos);
 }
 
+function doBrickExplosion(%pos, %radius) {
+	if(!%radius) {
+		%radius = 4;
+	}
+
+	%mask = $TypeMasks::FxBrickObjectType;
+	initContainerRadiusSearch(vectorSub(%pos, "0 0 0.5"), %radius, %mask);
+	while(%hit = containerSearchNext()) {
+		if(isObject(%hit)) {
+			%hit.breakBrick();
+		}
+	}
+}
+
 package CrumblingArenaRocketPackage {
 	function gravityRocketProjectile::onExplode(%data, %proj, %pos)
 	{
-		%radius = 4;
-
-		%mask = $TypeMasks::FxBrickObjectType;
-		initContainerRadiusSearch(%pos, %radius, %mask);
-		while(isObject(%hit = containerSearchNext())) {
-			%hit.breakBrick();
-		}
+		doBrickExplosion(%pos);
 
 		if(isObject(%proj.identifier)) {
 			%proj.identifier.delete();
